@@ -1,8 +1,12 @@
-const supabaseUrl = 'https://iyyusjkkdpkklyhjuofn.supabase.co'; 
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5eXVzamtrZHBra2x5aGp1b2ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE2MzgyOTgsImV4cCI6MjA3NzIxNDI5OH0.PcsYavAti6YpZN2yqpIrEC9N2-FBBqPcexazFpJxpnI'; 
+const supabaseUrl = 'https://iyyusjkkdpkklyhjuofn.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5eXVzamtrZHBra2x5aGp1b2ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE2MzgyOTgsImV4cCI6MjA3NzIxNDI5OH0.PcsYavAti6YpZN2yqpIrEC9N2-FBBqPcexazFpJxpnI';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 let selectedComplaintId = null;
+let currentPage = 1;
+const itemsPerPage = 6;
+let allComplaints = [];
+let filteredComplaints = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   loadAssignedComplaints();
@@ -37,22 +41,32 @@ async function loadAssignedComplaints() {
 
     if (error) throw error;
 
-    populateCards(complaints || []);
+    allComplaints = complaints || [];
+    filteredComplaints = [...allComplaints];
+    currentPage = 1; // Reset to first page when loading new data
+    populateCards();
+    setupPagination();
   } catch (err) {
     console.error("Error:", err);
     document.getElementById("complaintsGrid").innerHTML = `<div class="error-text">❌ ${err.message}</div>`;
   }
 }
 
-function populateCards(complaints) {
+function populateCards() {
   const grid = document.getElementById("complaintsGrid");
-
-  if (!complaints.length) {
-    grid.innerHTML = `<div class="no-complaints">No assigned complaints</div>`;
+  
+  if (!filteredComplaints.length) {
+    grid.innerHTML = `<div class="no-complaints">No assigned complaints found</div>`;
+    document.getElementById("pagination").innerHTML = '';
     return;
   }
 
-  grid.innerHTML = complaints.map(complaint => {
+  // Calculate items to show for current page
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentComplaints = filteredComplaints.slice(startIndex, endIndex);
+
+  grid.innerHTML = currentComplaints.map(complaint => {
     const hasUpdate = complaint.team_notes || complaint.after_photo;
     const clickHandler = hasUpdate ? `viewComplaint(${complaint.id})` : `openUpdateModal(${complaint.id})`;
     const clickText = hasUpdate ? 'View Details' : 'Click to update';
@@ -98,13 +112,131 @@ function populateCards(complaints) {
   lucide.createIcons();
 }
 
+function setupPagination() {
+  let paginationContainer = document.getElementById("pagination");
+  
+  // Create pagination container if it doesn't exist
+  if (!paginationContainer) {
+    paginationContainer = document.createElement("div");
+    paginationContainer.id = "pagination";
+    paginationContainer.className = "pagination";
+    
+    // Insert after complaints grid
+    const grid = document.getElementById("complaintsGrid");
+    grid.parentNode.insertBefore(paginationContainer, grid.nextSibling);
+  }
+
+  const totalPages = Math.ceil(filteredComplaints.length / itemsPerPage);
+  
+  if (totalPages <= 1) {
+    paginationContainer.innerHTML = '';
+    return;
+  }
+
+  let paginationHTML = '';
+  
+  // Previous button
+  if (currentPage > 1) {
+    paginationHTML += `<button class="pagination-btn" onclick="changePage(${currentPage - 1})">
+      <i data-lucide="chevron-left"></i> Previous
+    </button>`;
+  } else {
+    paginationHTML += `<button class="pagination-btn disabled" disabled>
+      <i data-lucide="chevron-left"></i> Previous
+    </button>`;
+  }
+
+  // Page numbers
+  const maxVisiblePages = 5;
+  let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+  let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+  
+  // Adjust if we're near the end
+  if (endPage - startPage + 1 < maxVisiblePages) {
+    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  }
+
+  // First page and ellipsis
+  if (startPage > 1) {
+    paginationHTML += `<button class="pagination-btn" onclick="changePage(1)">1</button>`;
+    if (startPage > 2) {
+      paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+    }
+  }
+
+  // Page numbers
+  for (let i = startPage; i <= endPage; i++) {
+    if (i === currentPage) {
+      paginationHTML += `<button class="pagination-btn active">${i}</button>`;
+    } else {
+      paginationHTML += `<button class="pagination-btn" onclick="changePage(${i})">${i}</button>`;
+    }
+  }
+
+  // Last page and ellipsis
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+    }
+    paginationHTML += `<button class="pagination-btn" onclick="changePage(${totalPages})">${totalPages}</button>`;
+  }
+
+  // Next button
+  if (currentPage < totalPages) {
+    paginationHTML += `<button class="pagination-btn" onclick="changePage(${currentPage + 1})">
+      Next <i data-lucide="chevron-right"></i>
+    </button>`;
+  } else {
+    paginationHTML += `<button class="pagination-btn disabled" disabled>
+      Next <i data-lucide="chevron-right"></i>
+    </button>`;
+  }
+
+  // Page info
+  paginationHTML += `<div class="page-info">
+    Page ${currentPage} of ${totalPages} | 
+    Showing ${Math.min(filteredComplaints.length, (currentPage - 1) * itemsPerPage + 1)}-${Math.min(currentPage * itemsPerPage, filteredComplaints.length)} 
+    of ${filteredComplaints.length} complaints
+  </div>`;
+
+  paginationContainer.innerHTML = paginationHTML;
+  lucide.createIcons();
+}
+
+function changePage(page) {
+  currentPage = page;
+  populateCards();
+  setupPagination();
+  
+  // Scroll to top of complaints section
+  const grid = document.getElementById("complaintsGrid");
+  grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function filterCards(query) {
+  const q = query.toLowerCase();
+  filteredComplaints = allComplaints.filter(complaint => 
+    complaint.category.toLowerCase().includes(q) ||
+    complaint.description.toLowerCase().includes(q) ||
+    complaint.location.toLowerCase().includes(q) ||
+    complaint.status.toLowerCase().includes(q) ||
+    complaint.id.toString().includes(q)
+  );
+  
+  currentPage = 1; // Reset to first page when filtering
+  populateCards();
+  setupPagination();
+}
+
+// Rest of your existing functions remain the same...
 function openUpdateModal(id) {
   selectedComplaintId = id;
   const modal = document.getElementById("updateModal");
   
-  // Fetching fcomplaint data to get report details
+  // Fetching complaint data to get report details
   fetchComplaintDetails(id).then(complaint => {
     if (complaint) {
+      document.getElementById("modalComplaintId").textContent = complaint.id;
       document.getElementById("modalCategory").textContent = complaint.category;
       document.getElementById("modalDescription").textContent = complaint.description;
       document.getElementById("modalLocation").textContent = complaint.location;
@@ -295,14 +427,6 @@ async function handleUpdateSubmit(e) {
     console.error("Upload error:", err);
     alert("Error" + err.message);
   }
-}
-
-function filterCards(query) {
-  const q = query.toLowerCase();
-  document.querySelectorAll(".complaint-card").forEach(card => {
-    const text = card.textContent.toLowerCase();
-    card.style.display = text.includes(q) ? "block" : "none";
-  });
 }
 
 function redirectToProfile() {
