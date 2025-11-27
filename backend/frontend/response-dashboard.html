@@ -17,7 +17,7 @@
     </div>
     <nav>
       <ul>
-        <li class="nav-item active"><a href="maintenance-dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
+        <li class="nav-item active"><a href="response-dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
         <li class="nav-item"><a href="response-profile.html"><i data-lucide="user"></i> Profile</a></li>
         <li class="nav-item"><a href="response-notification.html"><i data-lucide="bell"></i> Notifications</a></li>
         <li class="nav-item logout-btn"><a href="index.html" onclick="logout(); return false;"><i data-lucide="log-out"></i> Logout</a></li>
@@ -30,7 +30,7 @@
       <h1>Response Team Dashboard</h1>
       <div class="profile-circle" id="profileCircle" onclick="redirectToProfile()">
         <div class="initials" id="profileInitials">U</div>
-    </div>
+      </div>
     </header>
 
     <div class="card complaints-card">
@@ -42,6 +42,9 @@
       <div class="complaints-grid" id="complaintsGrid">
         <div class="loading-text">Loading complaints...</div>
       </div>
+      
+      <!-- Pagination Container -->
+      <div id="pagination" class="pagination"></div>
     </div>
   </main>
 
@@ -49,7 +52,7 @@
   <div id="updateModal" class="modal">
     <div class="modal-content">
       <header class="modal-header">
-        <h2>Maintenance Update</h2>
+        <h2>Response Team Update</h2>
         <button id="closeModal" class="modal-close" title="Close">✕</button>
       </header>
 
@@ -117,7 +120,7 @@
         </div>
 
         <div class="update-details">
-          <h3>Maintenance Update</h3>
+          <h3>Response Team Update</h3>
           <div class="team-notes-display">
             <label><strong>Team Notes:</strong></label>
             <div class="notes-content" id="viewTeamNotes">-</div>
