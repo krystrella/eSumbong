@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="image/favicon.png">
     <title>Notifications | eSumbong</title>
-    <link rel="stylesheet" href="css/admin-notifications.css" />
+    <link rel="stylesheet" href="css/notifications.css" />
     
 </head>
 
@@ -13,6 +13,7 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="sidebar-header">
+          <img src="image/favicon.png" alt="Logo" class="sidebar-logo">
             <h2>eSumbong</h2>
         </div>
 
@@ -22,12 +23,14 @@
                 <a href="user-dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
 
                 <li><a href="user-profile.html"><i data-lucide="user"></i> Profile</a></li>
+
+                
               <li data-link="admin-reports.html" class="nav-item ">
                 <a href="myreports.html"><i data-lucide="file-text" ></i> My Reports</a>
               </li>
-              <li data-link="submit-report.html" class="nav-item">
-                <a href="submit-report.html"><i data-lucide="file-plus"></i> Submit Report</a>
-              </li>
+
+              <li><a href="residents.html"><i data-lucide="users"></i> Residents</a></li>
+
               <li data-link="feedbacks.html" class="nav-item">
                 <a href="feedbacks.html"><i data-lucide="star"></i> Feedback</a>
               </li>
@@ -67,20 +70,13 @@
       </div>
 
       <ul id="reviewedList"></ul>
-      <div id="pendingPagination" class="pagination-container">
-        <ul class="pagination" id="pendingPaginationList"></ul>
-    </div>
-    <div id="pendingPaginationInfo" class="pagination-info"></div>
+
     <div class="notif-header-row">
     <h2>Resolved Complaints</h2>
     </div>
 
       <ul id="resolvedList"></ul>
-      <div id="resolvedPagination" class="pagination-container">
-        <ul class="pagination" id="resolvedPaginationList"></ul>
-    </div>
-    <div id="resolvedPaginationInfo" class="pagination-info"></div>
-    
+
     </main>
 
    <script src="https://unpkg.com/lucide@latest"></script>
